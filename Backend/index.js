@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { connectDB } from './Config/db.js';
+import userroutes from './Routes/user.routes.js'
 dotenv.config();
 connectDB();
 
@@ -21,8 +22,9 @@ app.use(
 app.use(express.json()); // Body parser for JSON
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use("/auth",userroutes);
 
 
 
 
-app.listen(()=>console.log(`server running on ${PORT}`));
+app.listen(PORT, () => console.log(`Server running on ${PORT}`));

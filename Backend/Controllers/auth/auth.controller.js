@@ -1,18 +1,17 @@
-import user from '../../Models/User.js';
+import {User} from '../../Models/User.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import Ashaworker from '../../Models/Ashaworker.js';
 export const register =async(req,res)=>{
   try {
     const {name,email,role,password}=req.body;
-    const existuser = await user.findOne({email});
-    if(existuser){
+    const existUser = await User.findOne({email});
+    if(existUser){
       return res.status(400).json({
         success:false,
-        message:"user already exists"
+        message:"User already exists"
       })
     }
-      if(role==="Admin"){ const adminexists=await user.findOne({role:"Admin"})
+      if(role==="Admin"){ const adminexists=await User.findOne({role:"Admin"})
       if(adminexists){
         return res.status(400).json({
           success:false,
@@ -23,13 +22,13 @@ export const register =async(req,res)=>{
      
     
     const hashed_password=await bcrypt.hash(password,10);
-    const register=await user.create({
+    const register=await User.create({
       name,email,role,password:hashed_password
     });
 
     return res.status(201).json({
       success:true,
-      message:"user registered successfully",
+      message:"User registered successfully",
       register
     });
 
@@ -47,7 +46,7 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     // 🔹 Check email exists
-    const existingUser = await user.findOne({ email });
+    const existingUser = await User.findOne({ email });
 
     if (!existingUser) {
       return res.status(404).json({
@@ -65,21 +64,8 @@ export const login = async (req, res) => {
         message: "Invalid credentials"
       });
     }
-    let hasprofile=false;
-    if( existingUser.role==="Admin"){
-      const Profile=await Ashaworker.findOne({AshaworkerId:existingUser._id});
-      if(Profile){
-      hasprofile=true;}
-    
-    }
-     if( existingUser.role==="Asha worker"){
-      const Profile=await Ashaworker.findOne({AshaworkerId:existingUser._id});
-      if(Profile){
-      hasprofile=true;
-    }
-    
-    }
-    console.log("hasprofile",hasprofile);
+   
+     
 
     // 🔹 Generate token
     const token = jwt.sign(
@@ -99,12 +85,12 @@ res.cookie("accessToken", token, {
 return res.status(200).json({
   success: true,
   message: "Login successful",
-  user: {
+  User: {
     id: existingUser._id,
     name: existingUser.name,
     email: existingUser.email,
-    role: existingUser.role,
-    hasprofile
+    
+  
   }
 });
   }
@@ -117,9 +103,9 @@ catch (error) {
 };
 export const authme=async(req,res)=>{
   try {
-    const userId=req.userId;
-    const userData=await user.findById(userId).populate("name email role");
-    if(!userData){
+    const UserId=req.UserId;
+    const UserData=await User.findById(UserId).populate("name email role");
+    if(!UserData){
       return res.status(404).json({
         success:false,
         message:"User not found"
@@ -127,7 +113,7 @@ export const authme=async(req,res)=>{
     }
     return res.status(200).json({
       success:true,
-      user:userData
+      User:UserData
     })
   } catch (error) {
     return res.status(500).json({
